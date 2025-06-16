@@ -10,7 +10,9 @@
       "Bash(*worker*_done.txt*)",
       "Bash(mkdir:*)",
       "Bash(then)",
-      "Bash(else)"
+      "Bash(else)",
+      "Bash(gh repo create:*)",
+      "Bash(git config:*)"
     ],
     "deny": []
   }
