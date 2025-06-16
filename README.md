@@ -12,7 +12,7 @@ JavaScriptとSVGで作られた美しく実用的なアナログ時計Webアプ�
 
 ## 🎯 デモ
 
-![Claude Clock Screenshot](screenshot.png)
+<img src="screenshot.png" width="300">
 
 ### 対応タイムゾーン
 
