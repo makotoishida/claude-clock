@@ -12,7 +12,10 @@
       "Bash(then)",
       "Bash(else)",
       "Bash(gh repo create:*)",
-      "Bash(git config:*)"
+      "Bash(git config:*)",
+      "Bash(ls:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)"
     ],
     "deny": []
   }

@@ -2,6 +2,8 @@
 
 JavaScriptとSVGで作られた美しく実用的なアナログ時計Webアプリケーション
 
+🌐 **[ライブデモ](https://makotoishida.github.io/claude-clock/)** - GitHub Pages で公開中
+
 ## ✨ 特徴
 
 - 🎨 **美しいデザイン**: 紫のグラデーション背景に白い文字盤の洗練されたアナログ時計
@@ -11,6 +13,8 @@ JavaScriptとSVGで作られた美しく実用的なアナログ時計Webアプ�
 - 🚀 **軽量**: 外部依存なし、シングルHTMLファイル
 
 ## 🎯 デモ
+
+**[🚀 ライブデモを試す](https://makotoishida.github.io/claude-clock/)**
 
 <img src="screenshot.png" width="300">
 
@@ -169,7 +173,7 @@ body {
 
 ```bash
 # リポジトリのクローン
-git clone https://github.com/YOUR_USERNAME/claude-clock.git
+git clone https://github.com/makotoishida/claude-clock.git
 cd claude-clock
 
 # ローカルサーバー起動
