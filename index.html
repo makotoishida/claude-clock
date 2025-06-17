@@ -433,8 +433,8 @@
                             ${this.generateTimezoneOptions()}
                         </select>
                     </div>
-                    <div class="clock" style="width: ${sizeMap[this.config.size]}; height: ${sizeMap[this.config.size]}; background: ${this.config.bgColor};">
-                        <div class="clock-face" style="background: ${this.config.faceColor};">
+                    <div class="clock" style="width: ${sizeMap[this.config.size]}; height: ${sizeMap[this.config.size]}; background: ${this.config.bgColor}; display: flex; align-items: center; justify-content: center;">
+                        <div class="clock-face" style="background: ${this.config.faceColor}; width: calc(100% - 16px); height: calc(100% - 16px);">
                             <svg width="100%" height="100%" style="position: absolute; top: 0; left: 0;">
                                 ${this.generateClockNumbers()}
                                 ${this.generateClockMarkers()}
@@ -448,7 +448,10 @@
                     <div class="digital-time" id="digital-time-${this.id}"></div>
                 `;
 
-                container.appendChild(clockWrapper);
+                // Only append if this element doesn't already exist (for initial render)
+                if (!this.element) {
+                    container.appendChild(clockWrapper);
+                }
                 this.element = clockWrapper;
             }
 
@@ -548,8 +551,20 @@
 
             updateConfig(newConfig) {
                 this.config = { ...this.config, ...newConfig };
+                
+                // Store the current position in the DOM
+                const nextSibling = this.element.nextElementSibling;
+                const parent = this.element.parentElement;
+                
                 this.element.remove();
                 this.render();
+                
+                // Restore the position in the DOM
+                if (nextSibling) {
+                    parent.insertBefore(this.element, nextSibling);
+                } else {
+                    parent.appendChild(this.element);
+                }
             }
 
             start() {
