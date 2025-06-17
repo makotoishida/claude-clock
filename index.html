@@ -4,6 +4,22 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Claude Clock - Multi Timezone Clocks</title>
+    
+    <!-- PWA Meta Tags -->
+    <meta name="description" content="Beautiful multi-timezone analog clocks with customizable settings">
+    <meta name="theme-color" content="#667eea">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Claude Clock">
+    <meta name="msapplication-TileColor" content="#667eea">
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="./manifest.json">
+    
+    <!-- PWA Icons -->
+    <link rel="icon" type="image/png" sizes="192x192" href="./icon-192x192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="./icon-512x512.png">
+    <link rel="apple-touch-icon" href="./icon-192x192.png">
     <style>
         * {
             margin: 0;
@@ -737,6 +753,60 @@
             // Add color preview updates
             ['clockBgColor', 'clockFaceColor', 'clockHandColor', 'clockSecondHandColor'].forEach(id => {
                 document.getElementById(id).addEventListener('input', updateColorPreviews);
+            });
+
+            // Register Service Worker for PWA
+            if ('serviceWorker' in navigator) {
+                window.addEventListener('load', function() {
+                    navigator.serviceWorker.register('./service-worker.js')
+                        .then(function(registration) {
+                            console.log('PWA: Service Worker registered successfully:', registration.scope);
+                            
+                            // Check for updates
+                            registration.addEventListener('updatefound', function() {
+                                const newWorker = registration.installing;
+                                console.log('PWA: New Service Worker found, installing...');
+                                
+                                newWorker.addEventListener('statechange', function() {
+                                    if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                        console.log('PWA: New content available, please refresh');
+                                        // Optional: Show update notification
+                                        if (confirm('New version available! Refresh to update?')) {
+                                            window.location.reload();
+                                        }
+                                    }
+                                });
+                            });
+                        })
+                        .catch(function(error) {
+                            console.log('PWA: Service Worker registration failed:', error);
+                        });
+
+                    // Handle messages from Service Worker
+                    navigator.serviceWorker.addEventListener('message', function(event) {
+                        if (event.data && event.data.type === 'SW_UPDATE') {
+                            console.log('PWA: Service Worker updated');
+                        }
+                    });
+                });
+            } else {
+                console.log('PWA: Service Worker not supported');
+            }
+
+            // Install prompt handling
+            let deferredPrompt;
+            window.addEventListener('beforeinstallprompt', function(e) {
+                console.log('PWA: Install prompt triggered');
+                e.preventDefault();
+                deferredPrompt = e;
+                
+                // Optional: Show custom install button
+                // showInstallButton();
+            });
+
+            window.addEventListener('appinstalled', function(e) {
+                console.log('PWA: App installed successfully');
+                deferredPrompt = null;
             });
         });
     </script>
