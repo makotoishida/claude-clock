@@ -3,415 +3,721 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>アナログ時計</title>
+    <title>Claude Clock - Multi Timezone Clocks</title>
     <style>
-        body {
+        * {
             margin: 0;
             padding: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            box-sizing: border-box;
+        }
+
+        body {
             font-family: 'Arial', sans-serif;
-        }
-        
-        .clock-container {
-            text-align: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
             padding: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 20px;
         }
-        
-        .timezone-selector {
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .controls {
             display: flex;
             justify-content: center;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(45deg, #f44336, #da190b);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+        }
+
+        .clocks-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .clock-wrapper {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+            position: relative;
+        }
+
+        .clock-wrapper:hover {
+            transform: translateY(-5px);
+        }
+
+        .clock-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             margin-bottom: 15px;
         }
-        
+
+        .clock-label {
+            color: white;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
+        .clock-settings {
+            display: flex;
+            gap: 5px;
+        }
+
+        .clock-btn {
+            width: 30px;
+            height: 30px;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.2s ease;
+        }
+
+        .settings-btn {
+            background: #2196F3;
+            color: white;
+        }
+
+        .delete-btn {
+            background: #f44336;
+            color: white;
+        }
+
+        .clock-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .clock {
+            width: 250px;
+            height: 250px;
+            margin: 0 auto;
+            border-radius: 50%;
+            position: relative;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            transition: all 0.3s ease;
+        }
+
+        .clock-face {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .center-dot {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 12px;
+            height: 12px;
+            background: #333;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 10;
+        }
+
+        .hand {
+            position: absolute;
+            background: #333;
+            transform-origin: bottom center;
+            border-radius: 2px;
+        }
+
+        .hour-hand {
+            width: 6px;
+            height: 60px;
+            left: 50%;
+            top: 50%;
+            margin-left: -3px;
+            margin-top: -60px;
+            transform-origin: center bottom;
+        }
+
+        .minute-hand {
+            width: 4px;
+            height: 80px;
+            left: 50%;
+            top: 50%;
+            margin-left: -2px;
+            margin-top: -80px;
+            transform-origin: center bottom;
+        }
+
+        .second-hand {
+            width: 2px;
+            height: 90px;
+            left: 50%;
+            top: 50%;
+            margin-left: -1px;
+            margin-top: -90px;
+            transform-origin: center bottom;
+            background: #e74c3c;
+        }
+
+        .timezone-selector {
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
         .timezone-selector select {
-            padding: 10px 15px;
-            border: 2px solid #fff;
+            padding: 8px 12px;
+            border: 2px solid rgba(255,255,255,0.3);
             border-radius: 10px;
             background: rgba(255, 255, 255, 0.9);
             font-size: 14px;
-            font-weight: bold;
             color: #333;
             cursor: pointer;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-            transition: all 0.3s ease;
         }
-        
-        .timezone-selector select:hover {
-            background: rgba(255, 255, 255, 1);
-            box-shadow: 0 6px 12px rgba(0,0,0,0.3);
-            transform: translateY(-2px);
+
+        .digital-time {
+            text-align: center;
+            color: white;
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-top: 15px;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
         }
-        
-        .timezone-selector select:focus {
-            outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.3);
+
+        .settings-panel {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            z-index: 1000;
+            max-width: 400px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
         }
-        
-        .clock {
-            width: 300px;
-            height: 300px;
-            border: 8px solid #fff;
-            border-radius: 50%;
-            background: radial-gradient(circle, #ffffff 0%, #f0f0f0 100%);
-            box-shadow: 0 0 30px rgba(0,0,0,0.3);
-            position: relative;
-            margin: 0 auto;
-        }
-        
-        .clock svg {
+
+        .settings-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
             width: 100%;
             height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 999;
         }
-        
-        .hour-markers {
-            stroke: #333;
-            stroke-width: 3;
+
+        .settings-group {
+            margin-bottom: 20px;
         }
-        
-        .minute-markers {
-            stroke: #666;
-            stroke-width: 1;
-        }
-        
-        .clock-numbers {
-            font-size: 18px;
+
+        .settings-group label {
+            display: block;
+            margin-bottom: 5px;
             font-weight: bold;
-            fill: #333;
-            text-anchor: middle;
-            dominant-baseline: central;
+            color: #333;
         }
-        
-        .hour-hand {
-            stroke: #333;
-            stroke-width: 6;
-            stroke-linecap: round;
-            transform-origin: 150px 150px;
-            transition: transform 0.5s ease-in-out;
+
+        .settings-group input,
+        .settings-group select {
+            width: 100%;
+            padding: 8px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
         }
-        
-        .minute-hand {
-            stroke: #555;
-            stroke-width: 4;
-            stroke-linecap: round;
-            transform-origin: 150px 150px;
-            transition: transform 0.5s ease-in-out;
+
+        .color-preview {
+            width: 30px;
+            height: 30px;
+            border-radius: 5px;
+            border: 2px solid #ddd;
+            display: inline-block;
+            margin-left: 10px;
+            vertical-align: middle;
         }
-        
-        .second-hand {
-            stroke: #ff4444;
-            stroke-width: 2;
-            stroke-linecap: round;
-            transform-origin: 150px 150px;
-            transition: transform 0.1s ease-in-out;
-        }
-        
-        .center-dot {
-            fill: #333;
-        }
-        
-        .digital-time {
-            margin-top: 20px;
-            font-size: 24px;
-            color: #fff;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
-        }
-        
-        h1 {
-            color: #fff;
-            margin-bottom: 15px;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
-        }
-        
-        /* レスポンシブ対応 */
+
         @media (max-width: 768px) {
-            .clock {
-                width: 250px;
-                height: 250px;
+            .clocks-container {
+                grid-template-columns: 1fr;
+                gap: 20px;
             }
-            
-            .timezone-selector select {
-                width: 200px;
-                font-size: 12px;
-            }
-            
-            h1 {
-                font-size: 24px;
-            }
-        }
-        
-        @media (max-width: 480px) {
+
             .clock {
                 width: 200px;
                 height: 200px;
             }
-            
-            .timezone-selector select {
-                width: 180px;
-                font-size: 11px;
-                padding: 8px 12px;
-            }
-            
-            .digital-time {
-                font-size: 18px;
+
+            .header h1 {
+                font-size: 2rem;
             }
         }
     </style>
 </head>
 <body>
-    <div class="clock-container">
-        <h1 id="clock-title">時計</h1>
-        
-        <div class="timezone-selector">
-            <select id="timezone-select">
-                <option value="UTC">🌍 UTC (協定世界時)</option>
-                <option value="Europe/London">🇬🇧 ロンドン (London)</option>
-                <option value="Europe/Berlin">🇩🇪 ベルリン (Berlin)</option>
-                <option value="Europe/Paris">🇫🇷 パリ (Paris)</option>
-                <option value="Europe/Rome">🇮🇹 ローマ (Rome)</option>
-                <option value="Asia/Shanghai">🇨🇳 上海 (Shanghai)</option>
-                <option value="Asia/Tokyo">🇯🇵 東京 (Tokyo)</option>
-                <option value="Asia/Seoul">🇰🇷 ソウル (Seoul)</option>
-                <option value="Australia/Sydney">🇦🇺 シドニー (Sydney)</option>
-                <option value="Pacific/Honolulu">🇺🇸 ホノルル (Honolulu)</option>
-                <option value="America/Los_Angeles">🇺🇸 ロサンゼルス (Los Angeles)</option>
-                <option value="America/New_York">🇺🇸 ニューヨーク (New York)</option>
+    <div class="header">
+        <h1>⏰ Claude Clock</h1>
+        <p>Multiple Timezone Clocks</p>
+    </div>
+
+    <div class="controls">
+        <button class="btn btn-primary" onclick="clockManager.addClock()">
+            ➕ Add Clock
+        </button>
+        <button class="btn btn-secondary" onclick="clockManager.clearAll()">
+            🗑️ Clear All
+        </button>
+    </div>
+
+    <div class="clocks-container" id="clocksContainer">
+        <!-- Clocks will be dynamically added here -->
+    </div>
+
+    <!-- Settings Panel -->
+    <div class="settings-overlay" id="settingsOverlay" onclick="closeSettings()"></div>
+    <div class="settings-panel" id="settingsPanel">
+        <h3>Clock Settings</h3>
+        <div class="settings-group">
+            <label for="clockLabel">Label:</label>
+            <input type="text" id="clockLabel" placeholder="Enter clock label">
+        </div>
+        <div class="settings-group">
+            <label for="clockTimezone">Timezone:</label>
+            <select id="clockTimezone">
+                <option value="UTC">UTC</option>
+                <option value="Europe/London">London</option>
+                <option value="Europe/Berlin">Berlin</option>
+                <option value="Europe/Paris">Paris</option>
+                <option value="Asia/Shanghai">Shanghai</option>
+                <option value="Asia/Tokyo">Tokyo</option>
+                <option value="Australia/Sydney">Sydney</option>
+                <option value="Pacific/Honolulu">Honolulu</option>
+                <option value="America/Los_Angeles">Los Angeles</option>
+                <option value="America/New_York">New York</option>
             </select>
         </div>
-        
-        <div class="clock">
-            <svg viewBox="0 0 300 300">
-                <!-- 時間マーカー -->
-                <g class="hour-markers">
-                    <line x1="150" y1="10" x2="150" y2="30" transform="rotate(0 150 150)" />
-                    <line x1="150" y1="10" x2="150" y2="30" transform="rotate(30 150 150)" />
-                    <line x1="150" y1="10" x2="150" y2="30" transform="rotate(60 150 150)" />
-                    <line x1="150" y1="10" x2="150" y2="30" transform="rotate(90 150 150)" />
-                    <line x1="150" y1="10" x2="150" y2="30" transform="rotate(120 150 150)" />
-                    <line x1="150" y1="10" x2="150" y2="30" transform="rotate(150 150 150)" />
-                    <line x1="150" y1="10" x2="150" y2="30" transform="rotate(180 150 150)" />
-                    <line x1="150" y1="10" x2="150" y2="30" transform="rotate(210 150 150)" />
-                    <line x1="150" y1="10" x2="150" y2="30" transform="rotate(240 150 150)" />
-                    <line x1="150" y1="10" x2="150" y2="30" transform="rotate(270 150 150)" />
-                    <line x1="150" y1="10" x2="150" y2="30" transform="rotate(300 150 150)" />
-                    <line x1="150" y1="10" x2="150" y2="30" transform="rotate(330 150 150)" />
-                </g>
-                
-                <!-- 分マーカー -->
-                <g class="minute-markers">
-                    <line x1="150" y1="15" x2="150" y2="25" transform="rotate(6 150 150)" />
-                    <line x1="150" y1="15" x2="150" y2="25" transform="rotate(12 150 150)" />
-                    <line x1="150" y1="15" x2="150" y2="25" transform="rotate(18 150 150)" />
-                    <line x1="150" y1="15" x2="150" y2="25" transform="rotate(24 150 150)" />
-                    <line x1="150" y1="15" x2="150" y2="25" transform="rotate(36 150 150)" />
-                    <line x1="150" y1="15" x2="150" y2="25" transform="rotate(42 150 150)" />
-                    <line x1="150" y1="15" x2="150" y2="25" transform="rotate(48 150 150)" />
-                    <line x1="150" y1="15" x2="150" y2="25" transform="rotate(54 150 150)" />
-                    <line x1="150" y1="15" x2="150" y2="25" transform="rotate(66 150 150)" />
-                    <line x1="150" y1="15" x2="150" y2="25" transform="rotate(72 150 150)" />
-                    <line x1="150" y1="15" x2="150" y2="25" transform="rotate(78 150 150)" />
-                    <line x1="150" y1="15" x2="150" y2="25" transform="rotate(84 150 150)" />
-                    <line x1="150" y1="15" x2="150" y2="25" transform="rotate(96 150 150)" />
-                    <line x1="150" y1="15" x2="150" y2="25" transform="rotate(102 150 150)" />
-                    <line x1="150" y1="15" x2="150" y2="25" transform="rotate(108 150 150)" />
-                    <line x1="150" y1="15" x2="150" y2="25" transform="rotate(114 150 150)" />
-                    <line x1="150" y1="15" x2="150" y2="25" transform="rotate(126 150 150)" />
-                    <line x1="150" y1="15" x2="150" y2="25" transform="rotate(132 150 150)" />
-                    <line x1="150" y1="15" x2="150" y2="25" transform="rotate(138 150 150)" />
-                    <line x1="150" y1="15" x2="150" y2="25" transform="rotate(144 150 150)" />
-                    <line x1="150" y1="15" x2="150" y2="25" transform="rotate(156 150 150)" />
-                    <line x1="150" y1="15" x2="150" y2="25" transform="rotate(162 150 150)" />
-                    <line x1="150" y1="15" x2="150" y2="25" transform="rotate(168 150 150)" />
-                    <line x1="150" y1="15" x2="150" y2="25" transform="rotate(174 150 150)" />
-                    <line x1="150" y1="15" x2="150" y2="25" transform="rotate(186 150 150)" />
-                    <line x1="150" y1="15" x2="150" y2="25" transform="rotate(192 150 150)" />
-                    <line x1="150" y1="15" x2="150" y2="25" transform="rotate(198 150 150)" />
-                    <line x1="150" y1="15" x2="150" y2="25" transform="rotate(204 150 150)" />
-                    <line x1="150" y1="15" x2="150" y2="25" transform="rotate(216 150 150)" />
-                    <line x1="150" y1="15" x2="150" y2="25" transform="rotate(222 150 150)" />
-                    <line x1="150" y1="15" x2="150" y2="25" transform="rotate(228 150 150)" />
-                    <line x1="150" y1="15" x2="150" y2="25" transform="rotate(234 150 150)" />
-                    <line x1="150" y1="15" x2="150" y2="25" transform="rotate(246 150 150)" />
-                    <line x1="150" y1="15" x2="150" y2="25" transform="rotate(252 150 150)" />
-                    <line x1="150" y1="15" x2="150" y2="25" transform="rotate(258 150 150)" />
-                    <line x1="150" y1="15" x2="150" y2="25" transform="rotate(264 150 150)" />
-                    <line x1="150" y1="15" x2="150" y2="25" transform="rotate(276 150 150)" />
-                    <line x1="150" y1="15" x2="150" y2="25" transform="rotate(282 150 150)" />
-                    <line x1="150" y1="15" x2="150" y2="25" transform="rotate(288 150 150)" />
-                    <line x1="150" y1="15" x2="150" y2="25" transform="rotate(294 150 150)" />
-                    <line x1="150" y1="15" x2="150" y2="25" transform="rotate(306 150 150)" />
-                    <line x1="150" y1="15" x2="150" y2="25" transform="rotate(312 150 150)" />
-                    <line x1="150" y1="15" x2="150" y2="25" transform="rotate(318 150 150)" />
-                    <line x1="150" y1="15" x2="150" y2="25" transform="rotate(324 150 150)" />
-                    <line x1="150" y1="15" x2="150" y2="25" transform="rotate(336 150 150)" />
-                    <line x1="150" y1="15" x2="150" y2="25" transform="rotate(342 150 150)" />
-                    <line x1="150" y1="15" x2="150" y2="25" transform="rotate(348 150 150)" />
-                    <line x1="150" y1="15" x2="150" y2="25" transform="rotate(354 150 150)" />
-                </g>
-                
-                <!-- 数字（JavaScriptで動的配置） -->
-                <g id="clock-numbers-container"></g>
-                
-                <!-- 時針 -->
-                <line x1="150" y1="150" x2="150" y2="80" class="hour-hand" id="hour-hand" />
-                
-                <!-- 分針 -->
-                <line x1="150" y1="150" x2="150" y2="50" class="minute-hand" id="minute-hand" />
-                
-                <!-- 秒針 -->
-                <line x1="150" y1="150" x2="150" y2="40" class="second-hand" id="second-hand" />
-                
-                <!-- 中央の点 -->
-                <circle cx="150" cy="150" r="8" class="center-dot" />
-            </svg>
+        <div class="settings-group">
+            <label for="clockBgColor">Background Color:</label>
+            <input type="color" id="clockBgColor" value="#ffffff">
+            <div class="color-preview" id="bgColorPreview"></div>
         </div>
-        
-        <div class="digital-time" id="digital-time"></div>
+        <div class="settings-group">
+            <label for="clockFaceColor">Face Color:</label>
+            <input type="color" id="clockFaceColor" value="#ffffff">
+            <div class="color-preview" id="faceColorPreview"></div>
+        </div>
+        <div class="settings-group">
+            <label for="clockHandColor">Hand Color:</label>
+            <input type="color" id="clockHandColor" value="#333333">
+            <div class="color-preview" id="handColorPreview"></div>
+        </div>
+        <div class="settings-group">
+            <label for="clockSecondHandColor">Second Hand Color:</label>
+            <input type="color" id="clockSecondHandColor" value="#e74c3c">
+            <div class="color-preview" id="secondHandColorPreview"></div>
+        </div>
+        <div class="settings-group">
+            <label for="clockSize">Size:</label>
+            <select id="clockSize">
+                <option value="small">Small (200px)</option>
+                <option value="medium" selected>Medium (250px)</option>
+                <option value="large">Large (300px)</option>
+            </select>
+        </div>
+        <div style="text-align: center; margin-top: 20px;">
+            <button class="btn btn-primary" onclick="saveClockSettings()">Save</button>
+            <button class="btn btn-secondary" onclick="closeSettings()" style="margin-left: 10px;">Cancel</button>
+        </div>
     </div>
 
     <script>
-        // 現在選択されているタイムゾーン
-        let currentTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-        
-        // タイムゾーンから都市名を取得する関数
-        function getCityName(timezone = currentTimezone) {
-            const cityMap = {
-                'Asia/Tokyo': '東京',
-                'America/New_York': 'New York',
-                'America/Los_Angeles': 'Los Angeles',
-                'Europe/London': 'London',
-                'Europe/Paris': 'Paris',
-                'Europe/Berlin': 'Berlin',
-                'Asia/Shanghai': '上海',
-                'Asia/Seoul': 'Seoul',
-                'Australia/Sydney': 'Sydney',
-                'America/Chicago': 'Chicago',
-                'America/Denver': 'Denver',
-                'Europe/Rome': 'Rome',
-                'Asia/Hong_Kong': '香港',
-                'Asia/Singapore': 'Singapore',
-                'Europe/Amsterdam': 'Amsterdam',
-                'America/Toronto': 'Toronto',
-                'Pacific/Auckland': 'Auckland',
-                'Pacific/Honolulu': 'Honolulu',
-                'UTC': 'UTC'
+        class Clock {
+            constructor(id, config = {}) {
+                this.id = id;
+                this.config = {
+                    label: config.label || 'Local Time',
+                    timezone: config.timezone || 'UTC',
+                    bgColor: config.bgColor || '#ffffff',
+                    faceColor: config.faceColor || '#ffffff',
+                    handColor: config.handColor || '#333333',
+                    secondHandColor: config.secondHandColor || '#e74c3c',
+                    size: config.size || 'medium',
+                    ...config
+                };
+                this.element = null;
+                this.intervalId = null;
+                this.render();
+                this.start();
+            }
+
+            render() {
+                const container = document.getElementById('clocksContainer');
+                const clockWrapper = document.createElement('div');
+                clockWrapper.className = 'clock-wrapper';
+                clockWrapper.id = `clock-wrapper-${this.id}`;
+
+                const sizeMap = {
+                    small: '200px',
+                    medium: '250px',
+                    large: '300px'
+                };
+
+                clockWrapper.innerHTML = `
+                    <div class="clock-controls">
+                        <div class="clock-label">${this.config.label}</div>
+                        <div class="clock-settings">
+                            <button class="clock-btn settings-btn" onclick="openSettings('${this.id}')" title="Settings">⚙️</button>
+                            <button class="clock-btn delete-btn" onclick="clockManager.removeClock('${this.id}')" title="Delete">❌</button>
+                        </div>
+                    </div>
+                    <div class="timezone-selector">
+                        <select onchange="clockManager.updateTimezone('${this.id}', this.value)">
+                            ${this.generateTimezoneOptions()}
+                        </select>
+                    </div>
+                    <div class="clock" style="width: ${sizeMap[this.config.size]}; height: ${sizeMap[this.config.size]}; background: ${this.config.bgColor};">
+                        <div class="clock-face" style="background: ${this.config.faceColor};">
+                            <svg width="100%" height="100%" style="position: absolute; top: 0; left: 0;">
+                                ${this.generateClockNumbers()}
+                                ${this.generateClockMarkers()}
+                            </svg>
+                            <div class="hour-hand" style="background: ${this.config.handColor};"></div>
+                            <div class="minute-hand" style="background: ${this.config.handColor};"></div>
+                            <div class="second-hand" style="background: ${this.config.secondHandColor};"></div>
+                            <div class="center-dot" style="background: ${this.config.handColor};"></div>
+                        </div>
+                    </div>
+                    <div class="digital-time" id="digital-time-${this.id}"></div>
+                `;
+
+                container.appendChild(clockWrapper);
+                this.element = clockWrapper;
+            }
+
+            generateTimezoneOptions() {
+                const timezones = {
+                    'UTC': '🌍 UTC (協定世界時)',
+                    'Europe/London': '🇬🇧 ロンドン (London)',
+                    'Europe/Berlin': '🇩🇪 ベルリン (Berlin)',
+                    'Europe/Paris': '🇫🇷 パリ (Paris)',
+                    'Asia/Shanghai': '🇨🇳 上海 (Shanghai)',
+                    'Asia/Tokyo': '🇯🇵 東京 (Tokyo)',
+                    'Australia/Sydney': '🇦🇺 シドニー (Sydney)',
+                    'Pacific/Honolulu': '🇺🇸 ホノルル (Honolulu)',
+                    'America/Los_Angeles': '🇺🇸 ロサンゼルス (Los Angeles)',
+                    'America/New_York': '🇺🇸 ニューヨーク (New York)'
+                };
+
+                return Object.entries(timezones)
+                    .map(([value, label]) =>
+                        `<option value="${value}" ${value === this.config.timezone ? 'selected' : ''}>${label}</option>`
+                    ).join('');
+            }
+
+            generateClockNumbers() {
+                let numbers = '';
+                for (let i = 1; i <= 12; i++) {
+                    const angle = (i * 30 - 90) * Math.PI / 180;
+                    const radius = 45;
+                    const x = 50 + radius * Math.cos(angle);
+                    const y = 50 + radius * Math.sin(angle);
+
+                    numbers += `<text x="${x}%" y="${y + 2}%" text-anchor="middle" font-size="18" font-weight="bold" fill="#333">${i}</text>`;
+                }
+                return numbers;
+            }
+
+            generateClockMarkers() {
+                let markers = '';
+                for (let i = 0; i < 60; i++) {
+                    const angle = i * 6;
+                    const isHour = i % 5 === 0;
+                    const length = isHour ? 8 : 4;
+                    const width = isHour ? 3 : 1;
+
+                    markers += `
+                        <line x1="50%" y1="${5}%" x2="50%" y2="${5 + length}%"
+                              stroke="#333" stroke-width="${width}"
+                              transform="rotate(${angle} 50 50)" transform-origin="50% 50%"/>
+                    `;
+                }
+                return markers;
+            }
+
+            updateTime() {
+                try {
+                    const now = new Date();
+                    const timeInZone = new Date(now.toLocaleString("en-US", {timeZone: this.config.timezone}));
+
+                    const hours = timeInZone.getHours();
+                    const minutes = timeInZone.getMinutes();
+                    const seconds = timeInZone.getSeconds();
+
+                    // Calculate angles (0 degrees = 12 o'clock, clockwise rotation)
+                    const hourAngle = (hours % 12) * 30 + (minutes * 0.5);
+                    const minuteAngle = minutes * 6;
+                    const secondAngle = seconds * 6;
+
+                    // Debug log for first clock only
+                    if (this.id === 'clock-1') {
+                        console.log(`Time: ${hours}:${minutes}:${seconds}, Angles: H=${hourAngle}°, M=${minuteAngle}°, S=${secondAngle}°`);
+                    }
+
+                    // Update hands
+                    const hourHand = this.element.querySelector('.hour-hand');
+                    const minuteHand = this.element.querySelector('.minute-hand');
+                    const secondHand = this.element.querySelector('.second-hand');
+
+                    if (hourHand) hourHand.style.transform = `rotate(${hourAngle}deg)`;
+                    if (minuteHand) minuteHand.style.transform = `rotate(${minuteAngle}deg)`;
+                    if (secondHand) secondHand.style.transform = `rotate(${secondAngle}deg)`;
+
+                    // Update digital time
+                    const digitalTime = document.getElementById(`digital-time-${this.id}`);
+                    if (digitalTime) {
+                        const month = String(timeInZone.getMonth() + 1).padStart(2, '0');
+                        const day = String(timeInZone.getDate()).padStart(2, '0');
+                        const hour = String(hours).padStart(2, '0');
+                        const minute = String(minutes).padStart(2, '0');
+                        const second = String(seconds).padStart(2, '0');
+
+                        digitalTime.textContent = `${month}/${day} ${hour}:${minute}:${second}`;
+                    }
+                } catch (error) {
+                    console.error('Error updating time:', error);
+                }
+            }
+
+            updateConfig(newConfig) {
+                this.config = { ...this.config, ...newConfig };
+                this.element.remove();
+                this.render();
+            }
+
+            start() {
+                this.updateTime();
+                this.intervalId = setInterval(() => this.updateTime(), 1000);
+            }
+
+            stop() {
+                if (this.intervalId) {
+                    clearInterval(this.intervalId);
+                    this.intervalId = null;
+                }
+            }
+
+            destroy() {
+                this.stop();
+                if (this.element) {
+                    this.element.remove();
+                }
+            }
+        }
+
+        class ClockManager {
+            constructor() {
+                this.clocks = new Map();
+                this.nextId = 1;
+                this.currentEditingClock = null;
+                this.loadFromStorage();
+
+                // Add default clock if none exist
+                if (this.clocks.size === 0) {
+                    this.addClock();
+                }
+            }
+
+            addClock(config = {}) {
+                const id = `clock-${this.nextId++}`;
+                const defaultConfig = {
+                    label: `Clock ${this.clocks.size + 1}`,
+                    timezone: 'UTC',
+                    bgColor: '#ffffff',
+                    faceColor: '#ffffff',
+                    handColor: '#333333',
+                    secondHandColor: '#e74c3c',
+                    size: 'medium'
+                };
+
+                const clock = new Clock(id, { ...defaultConfig, ...config });
+                this.clocks.set(id, clock);
+                this.saveToStorage();
+                return clock;
+            }
+
+            removeClock(id) {
+                const clock = this.clocks.get(id);
+                if (clock) {
+                    clock.destroy();
+                    this.clocks.delete(id);
+                    this.saveToStorage();
+                }
+            }
+
+            updateTimezone(id, timezone) {
+                const clock = this.clocks.get(id);
+                if (clock) {
+                    clock.config.timezone = timezone;
+                    this.saveToStorage();
+                }
+            }
+
+            clearAll() {
+                if (confirm('Are you sure you want to remove all clocks?')) {
+                    this.clocks.forEach(clock => clock.destroy());
+                    this.clocks.clear();
+                    this.saveToStorage();
+                }
+            }
+
+            saveToStorage() {
+                const data = Array.from(this.clocks.entries()).map(([id, clock]) => ({
+                    id: id,
+                    config: clock.config
+                }));
+                localStorage.setItem('claudeClocks', JSON.stringify(data));
+            }
+
+            loadFromStorage() {
+                try {
+                    const data = localStorage.getItem('claudeClocks');
+                    if (data) {
+                        const clocks = JSON.parse(data);
+                        clocks.forEach(({ id, config }) => {
+                            const clock = new Clock(id, config);
+                            this.clocks.set(id, clock);
+                        });
+                        this.nextId = Math.max(...Array.from(this.clocks.keys()).map(id =>
+                            parseInt(id.replace('clock-', '')) + 1
+                        )) || 1;
+                    }
+                } catch (error) {
+                    console.error('Error loading from storage:', error);
+                }
+            }
+        }
+
+        // Global functions
+        let clockManager;
+
+        function openSettings(clockId) {
+            const clock = clockManager.clocks.get(clockId);
+            if (!clock) return;
+
+            clockManager.currentEditingClock = clockId;
+
+            // Populate settings
+            document.getElementById('clockLabel').value = clock.config.label;
+            document.getElementById('clockTimezone').value = clock.config.timezone;
+            document.getElementById('clockBgColor').value = clock.config.bgColor;
+            document.getElementById('clockFaceColor').value = clock.config.faceColor;
+            document.getElementById('clockHandColor').value = clock.config.handColor;
+            document.getElementById('clockSecondHandColor').value = clock.config.secondHandColor;
+            document.getElementById('clockSize').value = clock.config.size;
+
+            // Update color previews
+            updateColorPreviews();
+
+            // Show settings panel
+            document.getElementById('settingsOverlay').style.display = 'block';
+            document.getElementById('settingsPanel').style.display = 'block';
+        }
+
+        function closeSettings() {
+            document.getElementById('settingsOverlay').style.display = 'none';
+            document.getElementById('settingsPanel').style.display = 'none';
+            clockManager.currentEditingClock = null;
+        }
+
+        function saveClockSettings() {
+            if (!clockManager.currentEditingClock) return;
+
+            const clock = clockManager.clocks.get(clockManager.currentEditingClock);
+            if (!clock) return;
+
+            const newConfig = {
+                label: document.getElementById('clockLabel').value,
+                timezone: document.getElementById('clockTimezone').value,
+                bgColor: document.getElementById('clockBgColor').value,
+                faceColor: document.getElementById('clockFaceColor').value,
+                handColor: document.getElementById('clockHandColor').value,
+                secondHandColor: document.getElementById('clockSecondHandColor').value,
+                size: document.getElementById('clockSize').value
             };
-            
-            return cityMap[timezone] || timezone.split('/').pop().replace('_', ' ');
+
+            clock.updateConfig(newConfig);
+            clockManager.saveToStorage();
+            closeSettings();
         }
-        
-        function updateClock() {
-            // 選択されたタイムゾーンの時刻を取得
-            const now = new Date();
-            const timezoneTime = new Date(now.toLocaleString("en-US", {timeZone: currentTimezone}));
-            
-            const hours = timezoneTime.getHours() % 12;
-            const minutes = timezoneTime.getMinutes();
-            const seconds = timezoneTime.getSeconds();
-            
-            // 角度計算（SVGの12時位置を基準として時計回りに計算）
-            const hourAngle = ((hours % 12) * 30 + minutes * 0.5); // 時針：12時間で360度、分で滑らかに移動
-            const minuteAngle = (minutes * 6); // 分針：60分で360度
-            const secondAngle = (seconds * 6); // 秒針：60秒で360度
-            
-            // 針の回転を適用
-            document.getElementById('hour-hand').style.transform = `rotate(${hourAngle}deg)`;
-            document.getElementById('minute-hand').style.transform = `rotate(${minuteAngle}deg)`;
-            document.getElementById('second-hand').style.transform = `rotate(${secondAngle}deg)`;
-            
-            // デジタル時刻表示（選択されたタイムゾーンの日付と時刻）
-            const timezoneDate = new Date(now.toLocaleString("en-US", {timeZone: currentTimezone}));
-            
-            // MM/DD HH:MM:SS形式でフォーマット
-            const month = String(timezoneDate.getMonth() + 1).padStart(2, '0');
-            const day = String(timezoneDate.getDate()).padStart(2, '0');
-            const displayHours = String(timezoneDate.getHours()).padStart(2, '0');
-            const displayMinutes = String(timezoneDate.getMinutes()).padStart(2, '0');
-            const displaySeconds = String(timezoneDate.getSeconds()).padStart(2, '0');
-            
-            const digitalTime = `${month}/${day} ${displayHours}:${displayMinutes}:${displaySeconds}`;
-            document.getElementById('digital-time').textContent = digitalTime;
+
+        function updateColorPreviews() {
+            document.getElementById('bgColorPreview').style.backgroundColor = document.getElementById('clockBgColor').value;
+            document.getElementById('faceColorPreview').style.backgroundColor = document.getElementById('clockFaceColor').value;
+            document.getElementById('handColorPreview').style.backgroundColor = document.getElementById('clockHandColor').value;
+            document.getElementById('secondHandColorPreview').style.backgroundColor = document.getElementById('clockSecondHandColor').value;
         }
-        
-        // タイムゾーン変更時の処理
-        function changeTimezone() {
-            const select = document.getElementById('timezone-select');
-            currentTimezone = select.value;
-            
-            // 都市名を更新
-            const cityName = getCityName(currentTimezone);
-            document.getElementById('clock-title').textContent = cityName;
-            
-            // 時計を即座に更新
-            updateClock();
-        }
-        
-        // 時計の数字を動的に配置する関数
-        function createClockNumbers() {
-            const container = document.getElementById('clock-numbers-container');
-            const centerX = 150;
-            const centerY = 150;
-            const radius = 105; // 数字を配置する円の半径（マーカーとの干渉を避けるため内側に調整）
-            
-            // 既存の数字をクリア
-            container.innerHTML = '';
-            
-            for (let i = 1; i <= 12; i++) {
-                // 角度計算（12時を0度、時計回り）
-                const angle = (i * 30 - 90) * Math.PI / 180; // -90で12時を上に調整
-                
-                // 座標計算
-                const x = centerX + radius * Math.cos(angle);
-                const y = centerY + radius * Math.sin(angle);
-                
-                // テキスト要素を作成
-                const textElement = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-                textElement.setAttribute('x', x);
-                textElement.setAttribute('y', y);
-                textElement.setAttribute('class', 'clock-numbers');
-                textElement.textContent = i === 0 ? 12 : i; // 0を12に変換
-                
-                container.appendChild(textElement);
-            }
-        }
-        
-        // ページ読み込み時に都市名を設定し、数字を配置
+
+        // Color input event listeners
         document.addEventListener('DOMContentLoaded', function() {
-            // デフォルトのタイムゾーンを設定
-            const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-            currentTimezone = userTimezone;
-            
-            // タイムゾーン選択ボックスにデフォルト値を設定
-            const select = document.getElementById('timezone-select');
-            if (select.querySelector(`option[value="${userTimezone}"]`)) {
-                select.value = userTimezone;
-            } else {
-                select.value = 'Asia/Tokyo'; // フォールバック
-                currentTimezone = 'Asia/Tokyo';
-            }
-            
-            // イベントリスナーを追加
-            select.addEventListener('change', changeTimezone);
-            
-            // 初期表示を設定
-            const cityName = getCityName(currentTimezone);
-            document.getElementById('clock-title').textContent = cityName;
-            createClockNumbers();
+            clockManager = new ClockManager();
+
+            // Add color preview updates
+            ['clockBgColor', 'clockFaceColor', 'clockHandColor', 'clockSecondHandColor'].forEach(id => {
+                document.getElementById(id).addEventListener('input', updateColorPreviews);
+            });
         });
-        
-        // 初回実行
-        updateClock();
-        
-        // 1秒ごとに更新
-        setInterval(updateClock, 1000);
     </script>
 </body>
 </html>

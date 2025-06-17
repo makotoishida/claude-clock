@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>アナログ時計</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Arial', sans-serif;
+        }
+        
+        .clock-container {
+            text-align: center;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .timezone-selector {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 15px;
+        }
+        
+        .timezone-selector select {
+            padding: 10px 15px;
+            border: 2px solid #fff;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.9);
+            font-size: 14px;
+            font-weight: bold;
+            color: #333;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+        }
+        
+        .timezone-selector select:hover {
+            background: rgba(255, 255, 255, 1);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+            transform: translateY(-2px);
+        }
+        
+        .timezone-selector select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.3);
+        }
+        
+        .clock {
+            width: 300px;
+            height: 300px;
+            border: 8px solid #fff;
+            border-radius: 50%;
+            background: radial-gradient(circle, #ffffff 0%, #f0f0f0 100%);
+            box-shadow: 0 0 30px rgba(0,0,0,0.3);
+            position: relative;
+            margin: 0 auto;
+        }
+        
+        .clock svg {
+            width: 100%;
+            height: 100%;
+        }
+        
+        .hour-markers {
+            stroke: #333;
+            stroke-width: 3;
+        }
+        
+        .minute-markers {
+            stroke: #666;
+            stroke-width: 1;
+        }
+        
+        .clock-numbers {
+            font-size: 18px;
+            font-weight: bold;
+            fill: #333;
+            text-anchor: middle;
+            dominant-baseline: central;
+        }
+        
+        .hour-hand {
+            stroke: #333;
+            stroke-width: 6;
+            stroke-linecap: round;
+            transform-origin: 150px 150px;
+            transition: transform 0.5s ease-in-out;
+        }
+        
+        .minute-hand {
+            stroke: #555;
+            stroke-width: 4;
+            stroke-linecap: round;
+            transform-origin: 150px 150px;
+            transition: transform 0.5s ease-in-out;
+        }
+        
+        .second-hand {
+            stroke: #ff4444;
+            stroke-width: 2;
+            stroke-linecap: round;
+            transform-origin: 150px 150px;
+            transition: transform 0.1s ease-in-out;
+        }
+        
+        .center-dot {
+            fill: #333;
+        }
+        
+        .digital-time {
+            margin-top: 20px;
+            font-size: 24px;
+            color: #fff;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        h1 {
+            color: #fff;
+            margin-bottom: 15px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        /* レスポンシブ対応 */
+        @media (max-width: 768px) {
+            .clock {
+                width: 250px;
+                height: 250px;
+            }
+            
+            .timezone-selector select {
+                width: 200px;
+                font-size: 12px;
+            }
+            
+            h1 {
+                font-size: 24px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .clock {
+                width: 200px;
+                height: 200px;
+            }
+            
+            .timezone-selector select {
+                width: 180px;
+                font-size: 11px;
+                padding: 8px 12px;
+            }
+            
+            .digital-time {
+                font-size: 18px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="clock-container">
+        <h1 id="clock-title">時計</h1>
+        
+        <div class="timezone-selector">
+            <select id="timezone-select">
+                <option value="UTC">🌍 UTC (協定世界時)</option>
+                <option value="Europe/London">🇬🇧 ロンドン (London)</option>
+                <option value="Europe/Berlin">🇩🇪 ベルリン (Berlin)</option>
+                <option value="Europe/Paris">🇫🇷 パリ (Paris)</option>
+                <option value="Europe/Rome">🇮🇹 ローマ (Rome)</option>
+                <option value="Asia/Shanghai">🇨🇳 上海 (Shanghai)</option>
+                <option value="Asia/Tokyo">🇯🇵 東京 (Tokyo)</option>
+                <option value="Asia/Seoul">🇰🇷 ソウル (Seoul)</option>
+                <option value="Australia/Sydney">🇦🇺 シドニー (Sydney)</option>
+                <option value="Pacific/Honolulu">🇺🇸 ホノルル (Honolulu)</option>
+                <option value="America/Los_Angeles">🇺🇸 ロサンゼルス (Los Angeles)</option>
+                <option value="America/New_York">🇺🇸 ニューヨーク (New York)</option>
+            </select>
+        </div>
+        
+        <div class="clock">
+            <svg viewBox="0 0 300 300">
+                <!-- 時間マーカー -->
+                <g class="hour-markers">
+                    <line x1="150" y1="10" x2="150" y2="30" transform="rotate(0 150 150)" />
+                    <line x1="150" y1="10" x2="150" y2="30" transform="rotate(30 150 150)" />
+                    <line x1="150" y1="10" x2="150" y2="30" transform="rotate(60 150 150)" />
+                    <line x1="150" y1="10" x2="150" y2="30" transform="rotate(90 150 150)" />
+                    <line x1="150" y1="10" x2="150" y2="30" transform="rotate(120 150 150)" />
+                    <line x1="150" y1="10" x2="150" y2="30" transform="rotate(150 150 150)" />
+                    <line x1="150" y1="10" x2="150" y2="30" transform="rotate(180 150 150)" />
+                    <line x1="150" y1="10" x2="150" y2="30" transform="rotate(210 150 150)" />
+                    <line x1="150" y1="10" x2="150" y2="30" transform="rotate(240 150 150)" />
+                    <line x1="150" y1="10" x2="150" y2="30" transform="rotate(270 150 150)" />
+                    <line x1="150" y1="10" x2="150" y2="30" transform="rotate(300 150 150)" />
+                    <line x1="150" y1="10" x2="150" y2="30" transform="rotate(330 150 150)" />
+                </g>
+                
+                <!-- 分マーカー -->
+                <g class="minute-markers">
+                    <line x1="150" y1="15" x2="150" y2="25" transform="rotate(6 150 150)" />
+                    <line x1="150" y1="15" x2="150" y2="25" transform="rotate(12 150 150)" />
+                    <line x1="150" y1="15" x2="150" y2="25" transform="rotate(18 150 150)" />
+                    <line x1="150" y1="15" x2="150" y2="25" transform="rotate(24 150 150)" />
+                    <line x1="150" y1="15" x2="150" y2="25" transform="rotate(36 150 150)" />
+                    <line x1="150" y1="15" x2="150" y2="25" transform="rotate(42 150 150)" />
+                    <line x1="150" y1="15" x2="150" y2="25" transform="rotate(48 150 150)" />
+                    <line x1="150" y1="15" x2="150" y2="25" transform="rotate(54 150 150)" />
+                    <line x1="150" y1="15" x2="150" y2="25" transform="rotate(66 150 150)" />
+                    <line x1="150" y1="15" x2="150" y2="25" transform="rotate(72 150 150)" />
+                    <line x1="150" y1="15" x2="150" y2="25" transform="rotate(78 150 150)" />
+                    <line x1="150" y1="15" x2="150" y2="25" transform="rotate(84 150 150)" />
+                    <line x1="150" y1="15" x2="150" y2="25" transform="rotate(96 150 150)" />
+                    <line x1="150" y1="15" x2="150" y2="25" transform="rotate(102 150 150)" />
+                    <line x1="150" y1="15" x2="150" y2="25" transform="rotate(108 150 150)" />
+                    <line x1="150" y1="15" x2="150" y2="25" transform="rotate(114 150 150)" />
+                    <line x1="150" y1="15" x2="150" y2="25" transform="rotate(126 150 150)" />
+                    <line x1="150" y1="15" x2="150" y2="25" transform="rotate(132 150 150)" />
+                    <line x1="150" y1="15" x2="150" y2="25" transform="rotate(138 150 150)" />
+                    <line x1="150" y1="15" x2="150" y2="25" transform="rotate(144 150 150)" />
+                    <line x1="150" y1="15" x2="150" y2="25" transform="rotate(156 150 150)" />
+                    <line x1="150" y1="15" x2="150" y2="25" transform="rotate(162 150 150)" />
+                    <line x1="150" y1="15" x2="150" y2="25" transform="rotate(168 150 150)" />
+                    <line x1="150" y1="15" x2="150" y2="25" transform="rotate(174 150 150)" />
+                    <line x1="150" y1="15" x2="150" y2="25" transform="rotate(186 150 150)" />
+                    <line x1="150" y1="15" x2="150" y2="25" transform="rotate(192 150 150)" />
+                    <line x1="150" y1="15" x2="150" y2="25" transform="rotate(198 150 150)" />
+                    <line x1="150" y1="15" x2="150" y2="25" transform="rotate(204 150 150)" />
+                    <line x1="150" y1="15" x2="150" y2="25" transform="rotate(216 150 150)" />
+                    <line x1="150" y1="15" x2="150" y2="25" transform="rotate(222 150 150)" />
+                    <line x1="150" y1="15" x2="150" y2="25" transform="rotate(228 150 150)" />
+                    <line x1="150" y1="15" x2="150" y2="25" transform="rotate(234 150 150)" />
+                    <line x1="150" y1="15" x2="150" y2="25" transform="rotate(246 150 150)" />
+                    <line x1="150" y1="15" x2="150" y2="25" transform="rotate(252 150 150)" />
+                    <line x1="150" y1="15" x2="150" y2="25" transform="rotate(258 150 150)" />
+                    <line x1="150" y1="15" x2="150" y2="25" transform="rotate(264 150 150)" />
+                    <line x1="150" y1="15" x2="150" y2="25" transform="rotate(276 150 150)" />
+                    <line x1="150" y1="15" x2="150" y2="25" transform="rotate(282 150 150)" />
+                    <line x1="150" y1="15" x2="150" y2="25" transform="rotate(288 150 150)" />
+                    <line x1="150" y1="15" x2="150" y2="25" transform="rotate(294 150 150)" />
+                    <line x1="150" y1="15" x2="150" y2="25" transform="rotate(306 150 150)" />
+                    <line x1="150" y1="15" x2="150" y2="25" transform="rotate(312 150 150)" />
+                    <line x1="150" y1="15" x2="150" y2="25" transform="rotate(318 150 150)" />
+                    <line x1="150" y1="15" x2="150" y2="25" transform="rotate(324 150 150)" />
+                    <line x1="150" y1="15" x2="150" y2="25" transform="rotate(336 150 150)" />
+                    <line x1="150" y1="15" x2="150" y2="25" transform="rotate(342 150 150)" />
+                    <line x1="150" y1="15" x2="150" y2="25" transform="rotate(348 150 150)" />
+                    <line x1="150" y1="15" x2="150" y2="25" transform="rotate(354 150 150)" />
+                </g>
+                
+                <!-- 数字（JavaScriptで動的配置） -->
+                <g id="clock-numbers-container"></g>
+                
+                <!-- 時針 -->
+                <line x1="150" y1="150" x2="150" y2="80" class="hour-hand" id="hour-hand" />
+                
+                <!-- 分針 -->
+                <line x1="150" y1="150" x2="150" y2="50" class="minute-hand" id="minute-hand" />
+                
+                <!-- 秒針 -->
+                <line x1="150" y1="150" x2="150" y2="40" class="second-hand" id="second-hand" />
+                
+                <!-- 中央の点 -->
+                <circle cx="150" cy="150" r="8" class="center-dot" />
+            </svg>
+        </div>
+        
+        <div class="digital-time" id="digital-time"></div>
+    </div>
+
+    <script>
+        // 現在選択されているタイムゾーン
+        let currentTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        
+        // タイムゾーンから都市名を取得する関数
+        function getCityName(timezone = currentTimezone) {
+            const cityMap = {
+                'Asia/Tokyo': '東京',
+                'America/New_York': 'New York',
+                'America/Los_Angeles': 'Los Angeles',
+                'Europe/London': 'London',
+                'Europe/Paris': 'Paris',
+                'Europe/Berlin': 'Berlin',
+                'Asia/Shanghai': '上海',
+                'Asia/Seoul': 'Seoul',
+                'Australia/Sydney': 'Sydney',
+                'America/Chicago': 'Chicago',
+                'America/Denver': 'Denver',
+                'Europe/Rome': 'Rome',
+                'Asia/Hong_Kong': '香港',
+                'Asia/Singapore': 'Singapore',
+                'Europe/Amsterdam': 'Amsterdam',
+                'America/Toronto': 'Toronto',
+                'Pacific/Auckland': 'Auckland',
+                'Pacific/Honolulu': 'Honolulu',
+                'UTC': 'UTC'
+            };
+            
+            return cityMap[timezone] || timezone.split('/').pop().replace('_', ' ');
+        }
+        
+        function updateClock() {
+            // 選択されたタイムゾーンの時刻を取得
+            const now = new Date();
+            const timezoneTime = new Date(now.toLocaleString("en-US", {timeZone: currentTimezone}));
+            
+            const hours = timezoneTime.getHours() % 12;
+            const minutes = timezoneTime.getMinutes();
+            const seconds = timezoneTime.getSeconds();
+            
+            // 角度計算（SVGの12時位置を基準として時計回りに計算）
+            const hourAngle = ((hours % 12) * 30 + minutes * 0.5); // 時針：12時間で360度、分で滑らかに移動
+            const minuteAngle = (minutes * 6); // 分針：60分で360度
+            const secondAngle = (seconds * 6); // 秒針：60秒で360度
+            
+            // 針の回転を適用
+            document.getElementById('hour-hand').style.transform = `rotate(${hourAngle}deg)`;
+            document.getElementById('minute-hand').style.transform = `rotate(${minuteAngle}deg)`;
+            document.getElementById('second-hand').style.transform = `rotate(${secondAngle}deg)`;
+            
+            // デジタル時刻表示（選択されたタイムゾーンの日付と時刻）
+            const timezoneDate = new Date(now.toLocaleString("en-US", {timeZone: currentTimezone}));
+            
+            // MM/DD HH:MM:SS形式でフォーマット
+            const month = String(timezoneDate.getMonth() + 1).padStart(2, '0');
+            const day = String(timezoneDate.getDate()).padStart(2, '0');
+            const displayHours = String(timezoneDate.getHours()).padStart(2, '0');
+            const displayMinutes = String(timezoneDate.getMinutes()).padStart(2, '0');
+            const displaySeconds = String(timezoneDate.getSeconds()).padStart(2, '0');
+            
+            const digitalTime = `${month}/${day} ${displayHours}:${displayMinutes}:${displaySeconds}`;
+            document.getElementById('digital-time').textContent = digitalTime;
+        }
+        
+        // タイムゾーン変更時の処理
+        function changeTimezone() {
+            const select = document.getElementById('timezone-select');
+            currentTimezone = select.value;
+            
+            // 都市名を更新
+            const cityName = getCityName(currentTimezone);
+            document.getElementById('clock-title').textContent = cityName;
+            
+            // 時計を即座に更新
+            updateClock();
+        }
+        
+        // 時計の数字を動的に配置する関数
+        function createClockNumbers() {
+            const container = document.getElementById('clock-numbers-container');
+            const centerX = 150;
+            const centerY = 150;
+            const radius = 105; // 数字を配置する円の半径（マーカーとの干渉を避けるため内側に調整）
+            
+            // 既存の数字をクリア
+            container.innerHTML = '';
+            
+            for (let i = 1; i <= 12; i++) {
+                // 角度計算（12時を0度、時計回り）
+                const angle = (i * 30 - 90) * Math.PI / 180; // -90で12時を上に調整
+                
+                // 座標計算
+                const x = centerX + radius * Math.cos(angle);
+                const y = centerY + radius * Math.sin(angle);
+                
+                // テキスト要素を作成
+                const textElement = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                textElement.setAttribute('x', x);
+                textElement.setAttribute('y', y);
+                textElement.setAttribute('class', 'clock-numbers');
+                textElement.textContent = i === 0 ? 12 : i; // 0を12に変換
+                
+                container.appendChild(textElement);
+            }
+        }
+        
+        // ページ読み込み時に都市名を設定し、数字を配置
+        document.addEventListener('DOMContentLoaded', function() {
+            // デフォルトのタイムゾーンを設定
+            const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+            currentTimezone = userTimezone;
+            
+            // タイムゾーン選択ボックスにデフォルト値を設定
+            const select = document.getElementById('timezone-select');
+            if (select.querySelector(`option[value="${userTimezone}"]`)) {
+                select.value = userTimezone;
+            } else {
+                select.value = 'Asia/Tokyo'; // フォールバック
+                currentTimezone = 'Asia/Tokyo';
+            }
+            
+            // イベントリスナーを追加
+            select.addEventListener('change', changeTimezone);
+            
+            // 初期表示を設定
+            const cityName = getCityName(currentTimezone);
+            document.getElementById('clock-title').textContent = cityName;
+            createClockNumbers();
+        });
+        
+        // 初回実行
+        updateClock();
+        
+        // 1秒ごとに更新
+        setInterval(updateClock, 1000);
+    </script>
+</body>
+</html>
