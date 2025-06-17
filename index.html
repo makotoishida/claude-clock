@@ -177,6 +177,7 @@
         }
 
         .hour-hand {
+            position: relative;
             width: 6px;
             height: 60px;
             left: 50%;
@@ -184,9 +185,11 @@
             margin-left: -3px;
             margin-top: -60px;
             transform-origin: center bottom;
+            transition: transform 0.5s ease-in-out;
         }
 
         .minute-hand {
+            position: relative;
             width: 4px;
             height: 80px;
             left: 50%;
@@ -194,9 +197,11 @@
             margin-left: -2px;
             margin-top: -80px;
             transform-origin: center bottom;
+            transition: transform 0.5s ease-in-out;
         }
 
         .second-hand {
+            position: relative;
             width: 2px;
             height: 90px;
             left: 50%;
@@ -205,6 +210,7 @@
             margin-top: -90px;
             transform-origin: center bottom;
             background: #e74c3c;
+            transition: transform 0.1s ease-in-out;
         }
 
         .timezone-selector {
@@ -471,10 +477,10 @@
                 for (let i = 1; i <= 12; i++) {
                     const angle = (i * 30 - 90) * Math.PI / 180;
                     const radius = 45;
-                    const x = 50 + radius * Math.cos(angle);
-                    const y = 50 + radius * Math.sin(angle);
+                    const x = 50 + radius * Math.cos(angle) * 0.74;
+                    const y = 50 + radius * Math.sin(angle) * 0.74;
 
-                    numbers += `<text x="${x}%" y="${y + 2}%" text-anchor="middle" font-size="18" font-weight="bold" fill="#333">${i}</text>`;
+                    numbers += `<text x="${x}%" y="${y + 2}%" text-anchor="middle" font-size="20" font-weight="bold" fill="#333">${i}</text>`;
                 }
                 return numbers;
             }
@@ -484,13 +490,13 @@
                 for (let i = 0; i < 60; i++) {
                     const angle = i * 6;
                     const isHour = i % 5 === 0;
-                    const length = isHour ? 8 : 4;
+                    const length = isHour ? 6 : 3;
                     const width = isHour ? 3 : 1;
 
                     markers += `
                         <line x1="50%" y1="${5}%" x2="50%" y2="${5 + length}%"
                               stroke="#333" stroke-width="${width}"
-                              transform="rotate(${angle} 50 50)" transform-origin="50% 50%"/>
+                              transform="rotate(${angle})" transform-origin="50% 50%"/>
                     `;
                 }
                 return markers;
